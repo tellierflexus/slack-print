@@ -10,11 +10,11 @@ def event():
 
     if request.json is not None: 
         content = request.json
-        print(content)
+        print(content, flush=True)
         if "challenge" in request.json:
             return content['challenge'], 200
         return Response(status=200)
-        
+
     return Response(status=201)
 
 if __name__ == "__main__":
