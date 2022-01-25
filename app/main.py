@@ -19,7 +19,8 @@ def event():
         if "event" in content:
             if "files" in content['event']:
                 files = content['event']['files'][0] 
-                app.logger.info('This is info output')
+                logging.basicConfig(level=logging.DEBUG)
+                app.logger.info(files['title'])
                 return Response(status=200)
 
     return Response(status=201)
