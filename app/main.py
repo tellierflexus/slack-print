@@ -12,9 +12,9 @@ logging.basicConfig(level=logging.DEBUG)
 def download(files):
     r = requests.get(files["url_private_download"], allow_redirects=True)
     open(files['title'], 'wb').write(r.content)  
-    print(files['title'])
+    print_file(files['title'])
 
-def print(path):
+def print_file(path):
     cups.setServer ("192.168.2.118:632")
     conn = cups.Connection()
     printers = conn.getPrinters()
