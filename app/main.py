@@ -20,7 +20,7 @@ def print(path):
     printers = conn.getPrinters()
     #printer_name = printers.keys()[0]
     printer_name = "Virtual"
-    conn.printFile(printer_name,'path',"",{})    
+    conn.printFile(printer_name,path,"",{})    
 
 
 
