@@ -10,7 +10,7 @@ def event():
     if request.json is not None: 
         content = request.json
 
-        if os.environ.get('docker-slack-cups') != "dev":
+        if os.environ.get('docker-slack-cups') == "dev":
             print(content, flush=True)
             if "challenge" in content:
                 return content['challenge'], 200
