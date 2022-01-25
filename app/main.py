@@ -15,10 +15,11 @@ def download(files):
     print(files['title'])
 
 def print(path):
-    conn = cups.Connection(host="192.168.2.118:632")
+    cups.setServer ("192.168.2.118:632")
+    conn = cups.Connection()
     printers = conn.getPrinters()
     #printer_name = printers.keys()[0]
-    printer_name = "Virtual_PDF_Printer"
+    printer_name = "Virtual"
     conn.printFile(printer_name,'path',"",{})    
 
 
