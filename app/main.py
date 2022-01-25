@@ -3,9 +3,24 @@ import requests
 import logging
 import os
 import sys
+import cups
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+
+def download(files):
+    r = requests.get(files["url_private_download"], allow_redirects=True)
+    open(files['title'], 'wb').write(r.content)  
+    print(files['title'])
+
+def print(path):
+    conn = cups.Connection(host=192.168.2.118:632)
+    printers = conn.getPrinters()
+    #printer_name = printers.keys()[0]
+    printer_name = "Virtual_PDF_Printer"
+    conn.printFile(printer_name,'path',"",{})    
+
 
 
 @app.route("/event",  methods=['GET', 'POST'])
@@ -24,9 +39,8 @@ def event():
                 files = content['event']['files'][0] 
                 
                 app.logger.info("New file sent " + str(files['title']))
-                if "url_private_download" in files:
-                    r = requests.get(files["url_private_download"], allow_redirects=True)
-                    open(files['title'], 'wb').write(r.content)
+                download(files)
+                    
                 return Response(status=200)
 
     return Response(status=201)
