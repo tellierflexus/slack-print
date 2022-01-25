@@ -10,7 +10,11 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def download(files):
-    r = requests.get(files["url_private_download"], allow_redirects=True)
+    if os.environ.get('token-slack') is not None:
+        token = os.environ.get('token-slack')
+    else:
+        token = ""
+    r = requests.get(files["url_private_download"], headers={'Authorization': 'Bearer %s' % token})
     open(files['title'], 'wb').write(r.content)  
     print_file(files['title'])
 
