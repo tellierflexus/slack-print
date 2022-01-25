@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 import os
+import sys
 
 app = Flask(__name__)
 
@@ -18,7 +19,7 @@ def event():
         if "event" in content:
             if "files" in content['event']:
                 files = content['event']['files'][0] 
-                print(files['title'])
+                print(files['title'], file=sys.stdout)
         return Response(status=200)
 
     return Response(status=201)
