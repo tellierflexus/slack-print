@@ -4,13 +4,13 @@ import logging
 import os
 import sys
 import cups
-import asyncio
+from threading import Thread
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-async def download(files):
+def download(files):
     if os.environ.get('token-slack') is not None:
         token = os.environ.get('token-slack')
     else:
@@ -45,8 +45,8 @@ def event():
                 files = content['event']['files'][0] 
                 
                 app.logger.info("New file sent " + str(files['title']))
-                loop = asyncio.get_event_loop()
-                loop.create_task(download(files))
+                thread = Thread(target=download, args=(files))
+                thread.start()
                     
                 return Response(status=200)
 
