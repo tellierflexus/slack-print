@@ -45,7 +45,7 @@ def event():
                 files = content['event']['files'][0] 
                 
                 app.logger.info("New file sent " + str(files['title']))
-                thread = Thread(target=download, args=(*files,))
+                thread = Thread(target=download, args=files)
                 thread.start()
                     
                 return Response(status=200)
