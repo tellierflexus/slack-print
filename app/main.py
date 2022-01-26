@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import cups
-import syncio
+import asyncio
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
