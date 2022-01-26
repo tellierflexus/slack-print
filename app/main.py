@@ -9,7 +9,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-def download(files):
+async def download(files):
     if os.environ.get('token-slack') is not None:
         token = os.environ.get('token-slack')
     else:
