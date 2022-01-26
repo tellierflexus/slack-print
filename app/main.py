@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import cups
+import syncio
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -16,7 +17,7 @@ async def download(files):
         token = ""
     r = requests.get(files["url_private_download"], headers={'Authorization': 'Bearer %s' % token})
     open(files['title'], 'wb').write(r.content)  
-    print_file(files['title'])
+    print_file(fciles['title'])
 
 def print_file(path):
     cups.setServer ("192.168.2.118:632")
@@ -44,7 +45,8 @@ def event():
                 files = content['event']['files'][0] 
                 
                 app.logger.info("New file sent " + str(files['title']))
-                download(files)
+                loop = asyncio.get_event_loop()
+                loop.create_task(download(files))
                     
                 return Response(status=200)
 
