@@ -17,7 +17,7 @@ def download(files):
         token = ""
     r = requests.get(files["url_private_download"], headers={'Authorization': 'Bearer %s' % token})
     open(files['title'], 'wb').write(r.content)  
-    print_file(fciles['title'])
+    print_file(files['title'])
 
 def print_file(path):
     cups.setServer ("192.168.2.118:632")
