@@ -24,7 +24,7 @@ def print_file(path):
     conn = cups.Connection()
     printers = conn.getPrinters()
     #printer_name = printers.keys()[0]
-    printer_name = "Virtual"
+    printer_name = "Redaction"
     conn.printFile(printer_name,path,"",{})    
 
 
