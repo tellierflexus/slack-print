@@ -36,7 +36,7 @@ def check_signature(f):
         if abs(int(time.time()) - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
             return refused(*args, **kwargs)
 
-        sig_basestring = 'v0:' + str(timestamp) + ':' + str(request.get_json(force=True))
+        sig_basestring = 'v0:' + str(timestamp) + ':' + request.get_data().decode()
         slack_signing_secret = os.environ.get('slack-print-signing').encode('utf-8')
         my_signature = 'v0=' + hmac.new(slack_signing_secret,sig_basestring.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
         slack_signature = request.headers['X-Slack-Signature']
