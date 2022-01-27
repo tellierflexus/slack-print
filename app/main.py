@@ -26,7 +26,7 @@ def check_signature(f):
         else:
             return refused(*args, **kwargs)
 
-        if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
+        if abs(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
             return refused(*args, **kwargs)
 
         sig_basestring = 'v0:' + timestamp + ':' + request_body
