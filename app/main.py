@@ -38,7 +38,7 @@ def check_signature(f):
 
         sig_basestring = 'v0:' + str(timestamp) + ':' + str(request.get_json(force=True))
         slack_signing_secret = os.environ.get('slack-print-signing').encode('utf-8')
-        my_signature = 'v0=' + hmac.new(slack_signing_secret,sig_basestring, digestmod=hashlib.sha256).hexdigest()
+        my_signature = 'v0=' + hmac.new(slack_signing_secret,sig_basestring.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
         slack_signature = request.headers['X-Slack-Signature']
 
         if hmac.compare_digest(my_signature, slack_signature):
