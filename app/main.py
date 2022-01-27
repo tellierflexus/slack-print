@@ -10,9 +10,37 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
+
+def check_signature(fonction):
+    def refused(*param, **option):
+        return "Not authorized", 403
+
+        
+    if os.environ.get('slack-print-mode') == "dev":
+        return fonction
+
+    timestamp = request.headers['X-Slack-Request-Timestamp']
+    if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
+        return refused
+
+    sig_basestring = 'v0:' + timestamp + ':' + request_body
+    slack_signing_secret = os.environ.get('slack-print-signing')
+    my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
+    slack_signature = request.headers['X-Slack-Signature']
+
+    if hmac.compare(my_signature, slack_signature):
+        return fonction
+    else:
+        app.logger.warning("Signature not matching !")
+        return refused
+
+
+
+    return refused
+
 def download(files):
     if os.environ.get('token-slack') is not None:
-        token = os.environ.get('token-slack')
+        token = os.environ.get('slack-print-token')
     else:
         token = ""
     r = requests.get(files["url_private_download"], headers={'Authorization': 'Bearer %s' % token})
@@ -28,14 +56,14 @@ def print_file(path):
     conn.printFile(printer_name,path,"",{})    
 
 
-
+@check_signature
 @app.route("/event",  methods=['GET', 'POST'])
 def event():
     
     if request.json is not None: 
         content = request.json
 
-        if os.environ.get('docker-slack-cups') == "dev":
+        if os.environ.get('slack-print-mode') == "dev":
             print(content, flush=True)
             if "challenge" in content:
                 return content['challenge'], 200
