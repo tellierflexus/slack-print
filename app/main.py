@@ -7,6 +7,7 @@ import cups
 from threading import Thread
 from functools import wraps
 import hmac
+import hashlib
 import time
 
 app = Flask(__name__)
@@ -37,10 +38,10 @@ def check_signature(f):
 
         sig_basestring = 'v0:' + str(timestamp) + ':' + str(request.get_json(force=True))
         slack_signing_secret = os.environ.get('slack-print-signing')
-        my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
+        my_signature = 'v0=' + hmac.new(slack_signing_secret,sig_basestring, digestmod=hashlib.sha256).hexdigest()
         slack_signature = request.headers['X-Slack-Signature']
 
-        if hmac.compare(my_signature, slack_signature):
+        if hmac.compare_digest(my_signature, slack_signature):
             return func(*args, **kwargs)
         else:
             app.logger.warning("Signature not matching !")
