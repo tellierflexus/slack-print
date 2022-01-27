@@ -6,6 +6,8 @@ import sys
 import cups
 from threading import Thread
 from functools import wraps
+import hmac
+import time
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
