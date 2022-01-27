@@ -11,35 +11,39 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 
-def check_signature(fonction):
-    def refused(*param, **option):
-        return "Not authorized", 403
+def check_signature(fonction): 
+    def wrapper(func): #As we have 2 decorators (this one above route) we need 2 wrappers to access the request context, the first one access the decorator route, then the function that we want
+        def wrap(*args, **kwargs)
+            def refused(*param, **option):
+                return "Not authorized", 403
 
-        
-    if os.environ.get('slack-print-mode') == "dev":
-        return fonction
 
-    timestamp = request.headers['X-Slack-Request-Timestamp']
-    if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
-        return refused
+            if os.environ.get('slack-print-mode') == "dev":
+                return fonction
 
-    sig_basestring = 'v0:' + timestamp + ':' + request_body
-    slack_signing_secret = os.environ.get('slack-print-signing')
-    my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
-    slack_signature = request.headers['X-Slack-Signature']
+            timestamp = request.headers['X-Slack-Request-Timestamp']
+            if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
+                return refused
 
-    if hmac.compare(my_signature, slack_signature):
-        return fonction
-    else:
-        app.logger.warning("Signature not matching !")
-        return refused
+            sig_basestring = 'v0:' + timestamp + ':' + request_body
+            slack_signing_secret = os.environ.get('slack-print-signing')
+            my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
+            slack_signature = request.headers['X-Slack-Signature']
+
+            if hmac.compare(my_signature, slack_signature):
+                return func(*args, **kwargs)
+            else:
+                app.logger.warning("Signature not matching !")
+                return refused
+        return wrap
+    return wrapper
 
 
 
     return refused
 
 def download(files):
-    if os.environ.get('token-slack') is not None:
+    if os.environ.get('slack-print-token') is not None:
         token = os.environ.get('slack-print-token')
     else:
         token = ""
