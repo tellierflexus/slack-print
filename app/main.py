@@ -22,7 +22,7 @@ def check_signature(f):
             return "Not authorized", 403
 
         if os.environ.get('slack-print-mode') == "dev":
-            return func(*args, **kwargs)
+            return f(*args, **kwargs)
 
         if request.headers is not None and 'X-Slack-Request-Timestamp' in request.headers:
             try:
@@ -43,7 +43,7 @@ def check_signature(f):
         app.logger.info(slack_signature)
         app.logger.info(my_signature)
         if hmac.compare_digest(my_signature, slack_signature):
-            return func(*args, **kwargs)
+            return f(*args, **kwargs)
         else:
             app.logger.warning("Signature not matching !")
             return refused(*args, **kwargs)
