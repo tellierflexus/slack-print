@@ -5,38 +5,41 @@ import os
 import sys
 import cups
 from threading import Thread
+from functools import wraps
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
 
-def check_signature(fonction): 
-    def wrapper(func): #As we have 2 decorators (this one above route) we need 2 wrappers to access the request context, the first one access the decorator route, then the function that we want
-        def wrap(*args, **kwargs):
-            def refused(*param, **option):
-                return "Not authorized", 403
+def check_signature(f): 
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        def refused(*args, **kwargs):
+            return "Not authorized", 403
 
+        if os.environ.get('slack-print-mode') == "dev":
+            return func(*args, **kwargs)
 
-            if os.environ.get('slack-print-mode') == "dev":
-                return fonction
-
+        if request.headers is not None and 'X-Slack-Request-Timestamp' in request.headers:
             timestamp = request.headers['X-Slack-Request-Timestamp']
-            if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
-                return refused
+        else:
+            return refused(*args, **kwargs)
 
-            sig_basestring = 'v0:' + timestamp + ':' + request_body
-            slack_signing_secret = os.environ.get('slack-print-signing')
-            my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
-            slack_signature = request.headers['X-Slack-Signature']
+        if absolute_value(time.time() - timestamp) > 60 * 5: #Too old request, it may be a replay attack (well according to slack)
+            return refused(*args, **kwargs)
 
-            if hmac.compare(my_signature, slack_signature):
-                return func(*args, **kwargs)
-            else:
-                app.logger.warning("Signature not matching !")
-                return refused
-        return wrap
-    return wrapper
+        sig_basestring = 'v0:' + timestamp + ':' + request_body
+        slack_signing_secret = os.environ.get('slack-print-signing')
+        my_signature = 'v0=' + hmac.compute_hash_sha256(slack_signing_secret,sig_basestring).hexdigest()
+        slack_signature = request.headers['X-Slack-Signature']
+
+        if hmac.compare(my_signature, slack_signature):
+            return func(*args, **kwargs)
+        else:
+            app.logger.warning("Signature not matching !")
+            return refused(*args, **kwargs)
+    return wrap
 
 
 
@@ -60,8 +63,9 @@ def print_file(path):
     conn.printFile(printer_name,path,"",{})    
 
 
-@check_signature
+
 @app.route("/event",  methods=['GET', 'POST'])
+@check_signature
 def event():
     
     if request.json is not None: 
