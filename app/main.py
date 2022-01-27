@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def check_signature(fonction): 
     def wrapper(func): #As we have 2 decorators (this one above route) we need 2 wrappers to access the request context, the first one access the decorator route, then the function that we want
-        def wrap(*args, **kwargs)
+        def wrap(*args, **kwargs):
             def refused(*param, **option):
                 return "Not authorized", 403
 
