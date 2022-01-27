@@ -40,7 +40,8 @@ def check_signature(f):
         slack_signing_secret = os.environ.get('slack-print-signing').encode('utf-8')
         my_signature = 'v0=' + hmac.new(slack_signing_secret,sig_basestring.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
         slack_signature = request.headers['X-Slack-Signature']
-
+        app.logger.info(slack_signature)
+        app.logger.info(my_signature)
         if hmac.compare_digest(my_signature, slack_signature):
             return func(*args, **kwargs)
         else:
