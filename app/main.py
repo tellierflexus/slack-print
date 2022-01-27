@@ -24,7 +24,11 @@ def check_signature(f):
             return func(*args, **kwargs)
 
         if request.headers is not None and 'X-Slack-Request-Timestamp' in request.headers:
-            timestamp = request.headers['X-Slack-Request-Timestamp']
+            try:
+                timestamp = int(request.headers['X-Slack-Request-Timestamp'])
+            except:
+                timestamp = 0
+
         else:
             return refused(*args, **kwargs)
 
